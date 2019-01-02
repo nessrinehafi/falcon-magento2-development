@@ -82,9 +82,15 @@ class FilterProcessor implements CollectionProcessorInterface
             if ($collection instanceof \Magento\CatalogSearch\Model\ResourceModel\Fulltext\Collection) {
                 //workaround to cover non compliant Collection API
                 foreach ($fields as $filterData) {
-                    $attributeCode = $filterData['attribute'];
-                    unset($filterData['attribute']);
-                    $collection->addFieldToFilter($attributeCode, $filterData);
+                    if ($filterData['attribute'] == 'search_term') {
+                        $attributeCode = $filterData['attribute'];
+                        unset($filterData['attribute']);
+                        $collection->addFieldToFilter($attributeCode, current($filterData));
+                    } else {
+                        $attributeCode = $filterData['attribute'];
+                        unset($filterData['attribute']);
+                        $collection->addFieldToFilter($attributeCode, $filterData);
+                    }
                 }
             } else {
                 $collection->addFieldToFilter($fields);

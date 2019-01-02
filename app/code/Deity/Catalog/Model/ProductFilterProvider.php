@@ -60,7 +60,11 @@ class ProductFilterProvider implements \Deity\CatalogApi\Api\ProductFilterProvid
         $magentoFilters = $this->filterList->getFilters($layer);
         $resultFilters = [];
         foreach ($magentoFilters as $magentoFilter) {
-            if (!$magentoFilter->getItemsCount()) {
+            try {
+                if (!$magentoFilter->getItemsCount()) {
+                    continue;
+                }
+            } catch (\Exception $e) {
                 continue;
             }
             $filterInitData = [];
