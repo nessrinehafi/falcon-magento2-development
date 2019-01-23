@@ -10,7 +10,8 @@ use Deity\CatalogApi\Api\ProductFilterProviderInterface;
 use Deity\CatalogSearchApi\Api\SearchInterface;
 use Magento\Catalog\Api\ProductRepositoryInterface;
 use Magento\Catalog\Model\Layer\Resolver;
-use Magento\CatalogInventory\Helper\Stock;
+use Magento\Catalog\Model\ResourceModel\Product\CollectionFactory;
+use Magento\Framework\Api\Search\SearchInterface as SearchApiProviderInterface;
 use Magento\Framework\Api\SearchCriteria\CollectionProcessorInterface;
 
 /**
@@ -20,7 +21,7 @@ use Magento\Framework\Api\SearchCriteria\CollectionProcessorInterface;
 class CatalogSearchProductList implements SearchInterface
 {
     /**
-     * @var \Magento\Catalog\Model\ResourceModel\Product\CollectionFactory
+     * @var CollectionFactory
      */
     private $collectionFactory;
 
@@ -30,7 +31,7 @@ class CatalogSearchProductList implements SearchInterface
     private $layerResolver;
 
     /**
-     * @var \Magento\Framework\Api\Search\SearchInterface
+     * @var SearchApiProviderInterface
      */
     private $searchApiProvider;
 
@@ -55,11 +56,6 @@ class CatalogSearchProductList implements SearchInterface
     private $productConverter;
 
     /**
-     * @var Stock
-     */
-    private $stockHelper;
-
-    /**
      * @var ProductFilterProviderInterface
      */
     private $filterProvider;
@@ -73,32 +69,30 @@ class CatalogSearchProductList implements SearchInterface
      * CatalogSearchProductList constructor.
      * @param ProductSearchResultsInterfaceFactory $productSearchResultFactory
      * @param ProductConvertInterface $convert
-     * @param Stock $stockHelper
      * @param Resolver $layerResolver
      * @param ProductRepositoryInterface $productRepository
      * @param ProductFilterProviderInterface $productFilterProvider
      * @param CollectionProcessorInterface $collectionProcessor
-     * @param \Magento\Framework\Api\Search\SearchInterface $searchApiProvider
-     * @param \Magento\Catalog\Model\ResourceModel\Product\CollectionFactory $collectionFactory
+     * @param SearchApiProviderInterface $searchApiProvider
+     * @param CollectionFactory $collectionFactory
      */
     public function __construct(
         ProductSearchResultsInterfaceFactory $productSearchResultFactory,
         ProductConvertInterface $convert,
-        Stock $stockHelper,
         Resolver $layerResolver,
         ProductRepositoryInterface $productRepository,
         ProductFilterProviderInterface $productFilterProvider,
         CollectionProcessorInterface $collectionProcessor,
-        \Magento\Framework\Api\Search\SearchInterface $searchApiProvider,
-        \Magento\Catalog\Model\ResourceModel\Product\CollectionFactory $collectionFactory
+        SearchApiProviderInterface $searchApiProvider,
+        CollectionFactory $collectionFactory
     )
     {
-        $this->stockHelper = $stockHelper;
         $this->collectionProcessor = $collectionProcessor;
         $this->filterProvider = $productFilterProvider;
         $this->productConverter = $convert;
         $this->productSearchResultFactory = $productSearchResultFactory;
         $this->searchApiProvider = $searchApiProvider;
+        // this is required to create search layer rather than catalog
         $layerResolver->create('search');
         $this->searchLayer = $layerResolver->get();
         $this->layerResolver = $layerResolver;
