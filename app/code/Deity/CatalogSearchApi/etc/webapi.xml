@@ -6,4 +6,10 @@
             <resource ref="anonymous" />
         </resources>
     </route>
+    <route url="/V1/catalog-search/autocomplete" method="GET">
+        <service class="Deity\CatalogSearchApi\Api\SearchAutocompleteInterface" method="search"/>
+        <resources>
+            <resource ref="anonymous" />
+        </resources>
+    </route>
 </routes>

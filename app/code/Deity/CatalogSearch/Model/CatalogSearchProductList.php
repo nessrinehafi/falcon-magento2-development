@@ -11,8 +11,9 @@ use Deity\CatalogSearchApi\Api\SearchInterface;
 use Magento\Catalog\Api\ProductRepositoryInterface;
 use Magento\Catalog\Model\Layer\Resolver;
 use Magento\Catalog\Model\ResourceModel\Product\CollectionFactory;
-use Magento\Framework\Api\Search\SearchInterface as SearchApiProviderInterface;
 use Magento\Framework\Api\SearchCriteria\CollectionProcessorInterface;
+use Magento\Catalog\Model\Config;
+use Magento\Catalog\Model\Product\Visibility;
 
 /**
  * Class CatalogSearchProductList
@@ -29,11 +30,6 @@ class CatalogSearchProductList implements SearchInterface
      * @var Resolver
      */
     private $layerResolver;
-
-    /**
-     * @var SearchApiProviderInterface
-     */
-    private $searchApiProvider;
 
     /**
      * @var ProductRepositoryInterface
@@ -73,7 +69,6 @@ class CatalogSearchProductList implements SearchInterface
      * @param ProductRepositoryInterface $productRepository
      * @param ProductFilterProviderInterface $productFilterProvider
      * @param CollectionProcessorInterface $collectionProcessor
-     * @param SearchApiProviderInterface $searchApiProvider
      * @param CollectionFactory $collectionFactory
      */
     public function __construct(
@@ -83,35 +78,41 @@ class CatalogSearchProductList implements SearchInterface
         ProductRepositoryInterface $productRepository,
         ProductFilterProviderInterface $productFilterProvider,
         CollectionProcessorInterface $collectionProcessor,
-        SearchApiProviderInterface $searchApiProvider,
-        CollectionFactory $collectionFactory
+        CollectionFactory $collectionFactory,
+        Config $catalogConfig,
+        Visibility $productVisibility
     )
     {
         $this->collectionProcessor = $collectionProcessor;
         $this->filterProvider = $productFilterProvider;
         $this->productConverter = $convert;
         $this->productSearchResultFactory = $productSearchResultFactory;
-        $this->searchApiProvider = $searchApiProvider;
         // this is required to create search layer rather than catalog
         $layerResolver->create('search');
         $this->searchLayer = $layerResolver->get();
         $this->layerResolver = $layerResolver;
         $this->productRepository = $productRepository;
         $this->collectionFactory = $collectionFactory;
+        $this->catalogConfig = $catalogConfig;
+        $this->productVisibility = $productVisibility;
     }
 
     /**
-     * Make Full Text Search and return found Documents
-     *
-     * @param \Magento\Framework\Api\Search\SearchCriteriaInterface $searchCriteria
-     * @return ProductSearchResultsInterface
+     * @inheritdoc
      */
-    public function search(\Magento\Framework\Api\Search\SearchCriteriaInterface $searchCriteria): ProductSearchResultsInterface
+    public function search(\Magento\Framework\Api\Search\SearchCriteriaInterface $searchCriteria, $query): ProductSearchResultsInterface
     {
         $responseProducts = [];
-        $collection = $this->collectionFactory->create();
-        $collection->setOrder('relevance');
-        $collection->addAttributeToSelect(['name', 'sku', 'image']);
+        $layer = $this->layerResolver->get();
+        $collection = $layer->getProductCollection();
+        $collection->setSearchQuery($query);
+        $collection
+            ->addAttributeToSelect($this->catalogConfig->getProductAttributes())
+            ->addMinimalPrice()
+            ->addFinalPrice()
+            ->addTaxPercents()
+            ->addUrlRewrite()
+            ->setVisibility($this->productVisibility->getVisibleInSearchIds());
         $this->collectionProcessor->process($searchCriteria, $collection);
         $collection->load();
 
@@ -123,7 +124,9 @@ class CatalogSearchProductList implements SearchInterface
 
         $productSearchResult = $this->productSearchResultFactory->create();
         $productSearchResult->setFilters(
-            $this->filterProvider->getFilterList($this->layerResolver->get())
+            $this->filterProvider->getFilterList(
+                $this->layerResolver->get()
+            )
         );
         $productSearchResult->setItems($responseProducts);
         $productSearchResult->setTotalCount(count($responseProducts));

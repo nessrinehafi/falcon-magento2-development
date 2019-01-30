@@ -2,6 +2,8 @@
 <config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:ObjectManager/etc/config.xsd">
     <preference for="Deity\CatalogSearchApi\Api\SearchInterface" type="Deity\CatalogSearch\Model\CatalogSearchProductList" />
     <preference for="Deity\CatalogApi\Api\Data\ProductSearchResultsInterface" type="Deity\Catalog\Model\Data\ProductSearchResults" />
+    <preference for="Deity\CatalogSearchApi\Api\SearchAutocompleteInterface" type="Deity\CatalogSearch\Model\CatalogSearchAutocomplete" />
+    <preference for="Magento\Search\Model\AutocompleteInterface" type="Magento\Search\Model\Autocomplete" />
 
     <virtualType name="Deity\VirtualType\CatalogSearch\Model\ResourceModel\Fulltext\SearchCollection" type="Magento\CatalogSearch\Model\ResourceModel\Fulltext\Collection">
         <arguments>
@@ -15,20 +17,21 @@
         </arguments>
     </virtualType>
 
-    <virtualType name="Deity\Catalog\Model\Api\SearchCriteria\ProductCollectionProcessor" type="Magento\Eav\Model\Api\SearchCriteria\CollectionProcessor">
+    <virtualType name="Deity\CatalogSearch\Model\Api\SearchCriteria\ProductCollectionProcessor" type="Magento\Eav\Model\Api\SearchCriteria\CollectionProcessor">
         <arguments>
             <argument name="processors" xsi:type="array">
-                <item name="filters" xsi:type="object">Deity\Catalog\Model\SearchCriteria\CollectionProcessor\FilterProcessor</item>
+                <item name="filters" xsi:type="object">Magento\Framework\Api\SearchCriteria\CollectionProcessor\FilterProcessor</item>
                 <item name="sorting" xsi:type="object">Magento\Framework\Api\SearchCriteria\CollectionProcessor\SortingProcessor</item>
                 <item name="pagination" xsi:type="object">Magento\Framework\Api\SearchCriteria\CollectionProcessor\PaginationProcessor</item>
             </argument>
         </arguments>
     </virtualType>
 
+
     <type name="Deity\CatalogSearch\Model\CatalogSearchProductList">
         <arguments>
             <argument name="collectionFactory" xsi:type="object">Deity\VirtualType\CatalogSearch\Model\ResourceModel\Fulltext\SearchCollectionFactory</argument>
-            <argument name="collectionProcessor" xsi:type="object">Deity\Catalog\Model\Api\SearchCriteria\ProductCollectionProcessor</argument>
+            <argument name="collectionProcessor" xsi:type="object">Deity\CatalogSearch\Model\Api\SearchCriteria\ProductCollectionProcessor</argument>
         </arguments>
     </type>
 
