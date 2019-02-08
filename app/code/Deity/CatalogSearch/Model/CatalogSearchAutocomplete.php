@@ -12,6 +12,7 @@ use Magento\Search\Model\AutocompleteInterface;
 
 /**
  * Class CatalogSearchAutocomplete
+ *
  * @package Deity\CatalogSearch\Model
  */
 class CatalogSearchAutocomplete implements SearchAutocompleteInterface
@@ -64,6 +65,5 @@ class CatalogSearchAutocomplete implements SearchAutocompleteInterface
             },
             [$this->autocompleteFactory->create()]
         );
-
     }
 }

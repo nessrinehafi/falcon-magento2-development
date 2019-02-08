@@ -9,14 +9,16 @@ use Deity\CatalogApi\Api\ProductConvertInterface;
 use Deity\CatalogApi\Api\ProductFilterProviderInterface;
 use Deity\CatalogSearchApi\Api\SearchInterface;
 use Magento\Catalog\Api\ProductRepositoryInterface;
-use Magento\Catalog\Model\Layer\Resolver;
-use Magento\Catalog\Model\ResourceModel\Product\CollectionFactory;
-use Magento\Framework\Api\SearchCriteria\CollectionProcessorInterface;
 use Magento\Catalog\Model\Config;
+use Magento\Catalog\Model\Layer\Resolver;
 use Magento\Catalog\Model\Product\Visibility;
+use Magento\Catalog\Model\ResourceModel\Product\CollectionFactory;
+use Magento\Framework\Api\Search\SearchCriteriaInterface;
+use Magento\Framework\Api\SearchCriteria\CollectionProcessorInterface;
 
 /**
  * Class CatalogSearchProductList
+ *
  * @package Deity\CatalogSearch\Model
  */
 class CatalogSearchProductList implements SearchInterface
@@ -70,6 +72,8 @@ class CatalogSearchProductList implements SearchInterface
      * @param ProductFilterProviderInterface $productFilterProvider
      * @param CollectionProcessorInterface $collectionProcessor
      * @param CollectionFactory $collectionFactory
+     * @param Config $catalogConfig
+     * @param Visibility $productVisibility
      */
     public function __construct(
         ProductSearchResultsInterfaceFactory $productSearchResultFactory,
@@ -81,8 +85,7 @@ class CatalogSearchProductList implements SearchInterface
         CollectionFactory $collectionFactory,
         Config $catalogConfig,
         Visibility $productVisibility
-    )
-    {
+    ) {
         $this->collectionProcessor = $collectionProcessor;
         $this->filterProvider = $productFilterProvider;
         $this->productConverter = $convert;
@@ -100,12 +103,17 @@ class CatalogSearchProductList implements SearchInterface
     /**
      * @inheritdoc
      */
-    public function search(\Magento\Framework\Api\Search\SearchCriteriaInterface $searchCriteria, $query): ProductSearchResultsInterface
+    public function search(SearchCriteriaInterface $searchCriteria, $query): ProductSearchResultsInterface
     {
         $responseProducts = [];
         $layer = $this->layerResolver->get();
         $collection = $layer->getProductCollection();
-        $collection->setSearchQuery($query);
+        if (\method_exists($collection, 'setSearchQuery')) {
+            // compatibility with Elastic-suite
+            $collection->setSearchQuery($query);
+        } else {
+            $collection->addSearchFilter($query);
+        }
         $collection
             ->addAttributeToSelect($this->catalogConfig->getProductAttributes())
             ->addMinimalPrice()
@@ -129,8 +137,7 @@ class CatalogSearchProductList implements SearchInterface
             )
         );
         $productSearchResult->setItems($responseProducts);
-        $productSearchResult->setTotalCount(count($responseProducts));
+        $productSearchResult->setTotalCount($collection->getSize());
         return $productSearchResult;
     }
-
 }

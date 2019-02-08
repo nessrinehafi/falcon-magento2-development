@@ -5,12 +5,15 @@ namespace Deity\CatalogSearchApi\Api;
 
 /**
  * Interface SearchAutocompleteInterface
+ *
  * @package Deity\CatalogSearchApi\Api
  * @api
  */
 interface SearchAutocompleteInterface
 {
     /**
+     * Main search method
+     *
      * @param string $q
      * @return []
      */

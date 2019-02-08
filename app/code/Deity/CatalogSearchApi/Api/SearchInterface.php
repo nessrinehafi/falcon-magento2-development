@@ -17,5 +17,6 @@ interface SearchInterface
      * @param string $query
      * @return \Deity\CatalogApi\Api\Data\ProductSearchResultsInterface
      */
-    public function search(\Magento\Framework\Api\Search\SearchCriteriaInterface $searchCriteria, $query) : \Deity\CatalogApi\Api\Data\ProductSearchResultsInterface;
+    public function search(\Magento\Framework\Api\Search\SearchCriteriaInterface $searchCriteria, $query) :
+        \Deity\CatalogApi\Api\Data\ProductSearchResultsInterface;
 }
