@@ -23,7 +23,7 @@ class CatalogSearchProductListTest extends WebapiAbstract
             'searchCriteria' => [
                 'filter_groups' => [],
                 'current_page' => 1,
-                'page_size' => 1000
+                'page_size' => 10
             ],
             'query' => 'simple'
         ];
@@ -48,7 +48,7 @@ class CatalogSearchProductListTest extends WebapiAbstract
             'searchCriteria' => [
                 'filter_groups' => [],
                 'current_page' => 1,
-                'page_size' => 1000
+                'page_size' => 10
             ],
             'query' => 'simple'
         ];
@@ -59,7 +59,6 @@ class CatalogSearchProductListTest extends WebapiAbstract
             ]
         ];
         $response = $this->_webApiCall($serviceInfo);
-        fwrite(STDOUT, var_dump($response) .  "\n");
         $this->assertNotEmpty($response['filters'], "Filter data is expected");
 
         $filterableOption = array_filter(

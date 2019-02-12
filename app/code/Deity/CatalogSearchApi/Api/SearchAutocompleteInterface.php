@@ -15,7 +15,7 @@ interface SearchAutocompleteInterface
      * Main search method
      *
      * @param string $q
-     * @return []
+     * @return array
      */
-    public function search($q);
+    public function search(string $q): array;
 }

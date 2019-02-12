@@ -7,6 +7,7 @@ use Deity\CatalogApi\Api\Data\ProductSearchResultsInterface;
 use Deity\CatalogApi\Api\Data\ProductSearchResultsInterfaceFactory;
 use Deity\CatalogApi\Api\ProductConvertInterface;
 use Deity\CatalogApi\Api\ProductFilterProviderInterface;
+use Deity\CatalogSearchApi\Api\QueryCollectionServiceInterface;
 use Deity\CatalogSearchApi\Api\SearchInterface;
 use Magento\Catalog\Api\ProductRepositoryInterface;
 use Magento\Catalog\Model\Config;
@@ -23,6 +24,10 @@ use Magento\Framework\Api\SearchCriteria\CollectionProcessorInterface;
  */
 class CatalogSearchProductList implements SearchInterface
 {
+    /**
+     * @var QueryCollectionServiceInterface
+     */
+    protected $queryCollectionService;
     /**
      * @var CollectionFactory
      */
@@ -74,6 +79,7 @@ class CatalogSearchProductList implements SearchInterface
      * @param CollectionFactory $collectionFactory
      * @param Config $catalogConfig
      * @param Visibility $productVisibility
+     * @param QueryCollectionServiceInterface $queryCollectionService
      */
     public function __construct(
         ProductSearchResultsInterfaceFactory $productSearchResultFactory,
@@ -84,7 +90,8 @@ class CatalogSearchProductList implements SearchInterface
         CollectionProcessorInterface $collectionProcessor,
         CollectionFactory $collectionFactory,
         Config $catalogConfig,
-        Visibility $productVisibility
+        Visibility $productVisibility,
+        QueryCollectionServiceInterface $queryCollectionService
     ) {
         $this->collectionProcessor = $collectionProcessor;
         $this->filterProvider = $productFilterProvider;
@@ -98,22 +105,18 @@ class CatalogSearchProductList implements SearchInterface
         $this->collectionFactory = $collectionFactory;
         $this->catalogConfig = $catalogConfig;
         $this->productVisibility = $productVisibility;
+        $this->queryCollectionService = $queryCollectionService;
     }
 
     /**
      * @inheritdoc
      */
-    public function search(SearchCriteriaInterface $searchCriteria, $query): ProductSearchResultsInterface
+    public function search(SearchCriteriaInterface $searchCriteria, string $query): ProductSearchResultsInterface
     {
         $responseProducts = [];
         $layer = $this->layerResolver->get();
         $collection = $layer->getProductCollection();
-        if (\method_exists($collection, 'setSearchQuery')) {
-            // compatibility with Elastic-suite
-            $collection->setSearchQuery($query);
-        } else {
-            $collection->addSearchFilter($query);
-        }
+
         $collection
             ->addAttributeToSelect($this->catalogConfig->getProductAttributes())
             ->addMinimalPrice()
@@ -121,8 +124,9 @@ class CatalogSearchProductList implements SearchInterface
             ->addTaxPercents()
             ->addUrlRewrite()
             ->setVisibility($this->productVisibility->getVisibleInSearchIds());
+
         $this->collectionProcessor->process($searchCriteria, $collection);
-        $collection->load();
+        $this->queryCollectionService->apply($collection, $query);
 
         foreach ($collection->getItems() as $product) {
             $responseProducts[] = $this->productConverter->convert(

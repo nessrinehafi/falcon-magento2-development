@@ -3,6 +3,7 @@
     <preference for="Deity\CatalogSearchApi\Api\SearchInterface" type="Deity\CatalogSearch\Model\CatalogSearchProductList" />
     <preference for="Deity\CatalogApi\Api\Data\ProductSearchResultsInterface" type="Deity\Catalog\Model\Data\ProductSearchResults" />
     <preference for="Deity\CatalogSearchApi\Api\SearchAutocompleteInterface" type="Deity\CatalogSearch\Model\CatalogSearchAutocomplete" />
+    <preference for="Deity\CatalogSearchApi\Api\QueryCollectionServiceInterface" type="Deity\CatalogSearch\Model\QueryCollection\Service" />
     <preference for="Magento\Search\Model\AutocompleteInterface" type="Magento\Search\Model\Autocomplete" />
 
     <virtualType name="Deity\VirtualType\CatalogSearch\Model\ResourceModel\Fulltext\SearchCollection" type="Magento\CatalogSearch\Model\ResourceModel\Fulltext\Collection">
@@ -27,11 +28,18 @@
         </arguments>
     </virtualType>
 
-
     <type name="Deity\CatalogSearch\Model\CatalogSearchProductList">
         <arguments>
             <argument name="collectionFactory" xsi:type="object">Deity\VirtualType\CatalogSearch\Model\ResourceModel\Fulltext\SearchCollectionFactory</argument>
             <argument name="collectionProcessor" xsi:type="object">Deity\CatalogSearch\Model\Api\SearchCriteria\ProductCollectionProcessor</argument>
+        </arguments>
+    </type>
+
+    <type name="Deity\CatalogSearch\Model\QueryCollection\Service">
+        <arguments>
+            <argument name="applySearchQueryProcessors" xsi:type="array">
+                <item name="Magento\CatalogSearch\Model\ResourceModel\Fulltext\Collection" xsi:type="object">Deity\CatalogSearch\Model\QueryCollection\Processor</item>
+            </argument>
         </arguments>
     </type>
 

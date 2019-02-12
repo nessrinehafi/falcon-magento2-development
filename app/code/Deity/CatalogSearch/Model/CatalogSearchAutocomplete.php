@@ -49,7 +49,7 @@ class CatalogSearchAutocomplete implements SearchAutocompleteInterface
     /**
      * @inheritdoc
      */
-    public function search($q)
+    public function search(string $q): array
     {
         if (!$this->request->getParam('q', false)) {
             return [];
