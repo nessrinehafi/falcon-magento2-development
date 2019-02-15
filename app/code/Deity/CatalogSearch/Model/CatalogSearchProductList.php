@@ -6,7 +6,7 @@ namespace Deity\CatalogSearch\Model;
 use Deity\CatalogApi\Api\Data\ProductSearchResultsInterface;
 use Deity\CatalogApi\Api\Data\ProductSearchResultsInterfaceFactory;
 use Deity\CatalogApi\Api\ProductConvertInterface;
-use Deity\CatalogApi\Api\ProductFilterProviderInterface;
+use Deity\CatalogSearchApi\Api\ProductFilterProviderInterface;
 use Deity\CatalogSearchApi\Api\QueryCollectionServiceInterface;
 use Deity\CatalogSearchApi\Api\SearchInterface;
 use Magento\Catalog\Api\ProductRepositoryInterface;
@@ -28,6 +28,17 @@ class CatalogSearchProductList implements SearchInterface
      * @var QueryCollectionServiceInterface
      */
     protected $queryCollectionService;
+
+    /**
+     * @var Config
+     */
+    protected $catalogConfig;
+
+    /**
+     * @var Visibility
+     */
+    protected $productVisibility;
+
     /**
      * @var CollectionFactory
      */

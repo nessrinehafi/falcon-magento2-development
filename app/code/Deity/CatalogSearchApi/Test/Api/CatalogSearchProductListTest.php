@@ -173,6 +173,7 @@ class CatalogSearchProductListTest extends WebapiAbstract
                 'httpMethod' => \Magento\Framework\Webapi\Rest\Request::HTTP_METHOD_GET,
             ]
         ];
+
         $response = $this->_webApiCall($serviceInfo);
         $this->assertEquals(1, $response['total_count'], 'Only one product is expected');
     }
